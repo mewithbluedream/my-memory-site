@@ -4,10 +4,13 @@ const gallery = document.getElementById("gallery");
 const loading = document.getElementById("loading");
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightbox-img");
-const lightboxCaption = document.getElementById("lightbox-caption");
+const captionInput = document.getElementById("lightbox-caption-input");
+const saveBtn = document.getElementById("save-caption-btn");
 const closeBtn = document.querySelector(".close");
 
-// 從 Google 雲端硬碟 API 獲取照片資料並顯示
+let currentPhotoName = ""; // 記錄目前點開的照片檔名
+
+// 從 Google 雲端硬碟 API 獲取照片與備註資料並顯示
 fetch(GAS_API_URL)
     .then(response => response.json())
     .then(photos => {
@@ -32,11 +35,12 @@ fetch(GAS_API_URL)
                 </div>
             `;
 
-            // 點擊放大
+            // 點擊放大並帶入對應備註
             item.addEventListener("click", () => {
+                currentPhotoName = photo.name;
                 lightbox.style.display = "flex";
                 lightboxImg.src = photo.url;
-                lightboxCaption.textContent = `${title} (${photo.date})`;
+                captionInput.value = photo.caption || ""; // 將抓到的備註填入輸入框
             });
 
             gallery.appendChild(item);
@@ -46,6 +50,34 @@ fetch(GAS_API_URL)
         console.error("載入失敗：", error);
         loading.textContent = "照片載入失敗，請檢查 API 網址或資料夾存取權限。";
     });
+
+// 點擊「儲存備註」按鈕時，透過 POST 寫入試算表
+saveBtn.addEventListener("click", () => {
+    const newCaption = captionInput.value;
+    saveBtn.textContent = "儲存中...";
+
+    fetch(GAS_API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            filename: currentPhotoName,
+            caption: newCaption
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        saveBtn.textContent = "儲存成功！";
+        setTimeout(() => { 
+            saveBtn.textContent = "儲存備註"; 
+        }, 2000);
+    })
+    .catch(err => {
+        console.error("儲存失敗", err);
+        saveBtn.textContent = "儲存失敗";
+        setTimeout(() => { 
+            saveBtn.textContent = "儲存備註"; 
+        }, 2000);
+    });
+});
 
 // 關閉燈箱
 closeBtn.addEventListener("click", () => lightbox.style.display = "none");
