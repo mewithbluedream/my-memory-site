@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>珍藏回憶相簿</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>我們的美好回憶</h1>
+        <p>每一張照片，都是一段閃閃發光的時光</p>
+    </header>
+
+    <main>
+        <!-- 載入中動畫 -->
+        <div id="loading" class="loading">照片載入中...</div>
+        <!-- 相簿展廊 -->
+        <div class="gallery-grid" id="gallery"></div>
+    </main>
+
+    <!-- 圖片點擊放大 (Lightbox) -->
+    <div id="lightbox" class="lightbox" style="display:none;">
+        <span class="close">&times;</span>
+        <img id="lightbox-img" src="" alt="大圖">
+        <p id="lightbox-caption"></p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
