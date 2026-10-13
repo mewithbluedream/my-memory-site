@@ -1,4 +1,4 @@
-const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzP1ULPif99EPIogdqAF-6vcDLKR-0U2ZyTD5fDWYc5f0Skmd_8sXmLCIlXk5zu0zTUPQ/exec";
+const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzUc1oQVsjbmDabjxNyPM155TMtp50_-p8TtnT9pA7lJWespu6_f5hUb6wGW-Zfyfwi/exec";
 
 const gallery = document.getElementById("gallery");
 const loading = document.getElementById("loading");
