@@ -9,11 +9,14 @@ const commentInput = document.getElementById("lightbox-comment-input");
 const sendBtn = document.getElementById("send-comment-btn");
 const closeBtn = document.querySelector(".close");
 
-// 塗鴉相關 DOM 元素
+// 塗鴉與顏色選擇 DOM 元素
 const canvas = document.getElementById("doodle-canvas");
 const ctx = canvas.getContext("2d");
 const toggleDoodleBtn = document.getElementById("toggle-doodle-btn");
 const clearDoodleBtn = document.getElementById("clear-doodle-btn");
+const colorContainer = document.getElementById("color-picker-container");
+const colorPicker = document.getElementById("doodle-color-picker");
+const colorBtns = document.querySelectorAll(".color-btn");
 
 let currentPhotoName = ""; // 記錄目前點開的照片檔名
 let isDrawing = false;
@@ -69,7 +72,7 @@ fetch(GAS_API_URL)
 lightboxImg.addEventListener("load", () => {
     canvas.width = lightboxImg.clientWidth;
     canvas.height = lightboxImg.clientHeight;
-    ctx.strokeStyle = "#ff4757"; // 預設畫筆顏色：紅色
+    ctx.strokeStyle = colorPicker.value; // 使用當前選定顏色
     ctx.lineWidth = 4;           // 畫筆粗細
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
@@ -87,12 +90,28 @@ function updateDoodleUI() {
         canvas.style.pointerEvents = "auto"; // 允許滑鼠畫畫
         toggleDoodleBtn.textContent = "❌ 關閉塗鴉";
         clearDoodleBtn.style.display = "inline-block";
+        colorContainer.style.display = "flex"; // 顯示顏色選單
     } else {
         canvas.style.pointerEvents = "none";
         toggleDoodleBtn.textContent = "✏️ 開始塗鴉";
         clearDoodleBtn.style.display = "none";
+        colorContainer.style.display = "none";  // 隱藏顏色選單
     }
 }
+
+// 監聽色盤變更
+colorPicker.addEventListener("input", (e) => {
+    ctx.strokeStyle = e.target.value;
+});
+
+// 點擊快捷顏色圓點
+colorBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+        const selectedColor = btn.getAttribute("data-color");
+        ctx.strokeStyle = selectedColor;
+        colorPicker.value = selectedColor; // 同步更新色盤的值
+    });
+});
 
 // 清除畫布
 clearDoodleBtn.addEventListener("click", clearCanvas);
@@ -158,14 +177,13 @@ sendBtn.addEventListener("click", () => {
     .then(res => res.json())
     .then(data => {
         sendBtn.textContent = "送出";
-        // 即時更新畫面的留言區，將新留言接在後面
         if (commentList.textContent.includes("目前還沒有人留言")) {
             commentList.textContent = text;
         } else {
             commentList.textContent += "\n" + text;
         }
         commentInput.value = "";
-        commentList.scrollTop = commentList.scrollHeight; // 自動捲動到最新留言
+        commentList.scrollTop = commentList.scrollHeight;
     })
     .catch(err => {
         console.error("留言失敗", err);

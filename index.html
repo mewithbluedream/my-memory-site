@@ -30,9 +30,19 @@
         </div>
 
         <!-- 塗鴉控制按鈕列 -->
-        <div class="doodle-bar" style="margin-top: 10px; display: flex; gap: 10px;">
+        <div class="doodle-bar" style="margin-top: 10px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;">
             <button id="toggle-doodle-btn" style="padding: 6px 12px; background: #ff4757; color: white; border: none; border-radius: 4px; cursor: pointer;">✏️ 開始塗鴉</button>
             <button id="clear-doodle-btn" style="display: none; padding: 6px 12px; background: #ffa502; color: white; border: none; border-radius: 4px; cursor: pointer;">🗑️ 清除畫布</button>
+            
+            <!-- 顏色選擇器與快捷按鈕 (預設隱藏，點擊開始塗鴉後顯示) -->
+            <div id="color-picker-container" style="display: none; align-items: center; gap: 6px; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px;">
+                <input type="color" id="doodle-color-picker" value="#ff4757" title="選擇自訂顏色" style="width: 25px; height: 25px; border: none; cursor: pointer; background: none;">
+                <button class="color-btn" data-color="#ff4757" style="width: 18px; height: 18px; border-radius: 50%; background: #ff4757; border: 2px solid white; cursor: pointer; padding: 0;"></button>
+                <button class="color-btn" data-color="#2ed573" style="width: 18px; height: 18px; border-radius: 50%; background: #2ed573; border: 2px solid white; cursor: pointer; padding: 0;"></button>
+                <button class="color-btn" data-color="#1e90ff" style="width: 18px; height: 18px; border-radius: 50%; background: #1e90ff; border: 2px solid white; cursor: pointer; padding: 0;"></button>
+                <button class="color-btn" data-color="#ffa502" style="width: 18px; height: 18px; border-radius: 50%; background: #ffa502; border: 2px solid white; cursor: pointer; padding: 0;"></button>
+                <button class="color-btn" data-color="#ffffff" style="width: 18px; height: 18px; border-radius: 50%; background: #ffffff; border: 2px solid #555; cursor: pointer; padding: 0;"></button>
+            </div>
         </div>
         
         <!-- 留言板容器 -->
