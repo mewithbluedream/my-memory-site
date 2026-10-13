@@ -9,7 +9,15 @@ const commentInput = document.getElementById("lightbox-comment-input");
 const sendBtn = document.getElementById("send-comment-btn");
 const closeBtn = document.querySelector(".close");
 
+// 塗鴉相關 DOM 元素
+const canvas = document.getElementById("doodle-canvas");
+const ctx = canvas.getContext("2d");
+const toggleDoodleBtn = document.getElementById("toggle-doodle-btn");
+const clearDoodleBtn = document.getElementById("clear-doodle-btn");
+
 let currentPhotoName = ""; // 記錄目前點開的照片檔名
+let isDrawing = false;
+let doodleMode = false;
 
 // 從 Google 雲端硬碟 API 獲取照片與留言資料並顯示
 fetch(GAS_API_URL)
@@ -36,13 +44,17 @@ fetch(GAS_API_URL)
                 </div>
             `;
 
-            // 點擊放大，載入該照片的留言板內容
+            // 點擊放大，載入該照片的留言板內容與重設畫布
             item.addEventListener("click", () => {
                 currentPhotoName = photo.name;
                 lightbox.style.display = "flex";
                 lightboxImg.src = photo.url;
                 commentList.textContent = photo.caption || "目前還沒有人留言，趕快留下第一句話吧！";
                 commentInput.value = "";
+
+                // 關閉塗鴉模式
+                doodleMode = false;
+                updateDoodleUI();
             });
 
             gallery.appendChild(item);
@@ -52,6 +64,82 @@ fetch(GAS_API_URL)
         console.error("載入失敗：", error);
         loading.textContent = "照片載入失敗，請檢查 API 網址或資料夾存取權限。";
     });
+
+// 當燈箱圖片載入完成時，讓 canvas 大小自動貼合圖片尺寸
+lightboxImg.addEventListener("load", () => {
+    canvas.width = lightboxImg.clientWidth;
+    canvas.height = lightboxImg.clientHeight;
+    ctx.strokeStyle = "#ff4757"; // 預設畫筆顏色：紅色
+    ctx.lineWidth = 4;           // 畫筆粗細
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    clearCanvas();
+});
+
+// 切換塗鴉模式開關
+toggleDoodleBtn.addEventListener("click", () => {
+    doodleMode = !doodleMode;
+    updateDoodleUI();
+});
+
+function updateDoodleUI() {
+    if (doodleMode) {
+        canvas.style.pointerEvents = "auto"; // 允許滑鼠畫畫
+        toggleDoodleBtn.textContent = "❌ 關閉塗鴉";
+        clearDoodleBtn.style.display = "inline-block";
+    } else {
+        canvas.style.pointerEvents = "none";
+        toggleDoodleBtn.textContent = "✏️ 開始塗鴉";
+        clearDoodleBtn.style.display = "none";
+    }
+}
+
+// 清除畫布
+clearDoodleBtn.addEventListener("click", clearCanvas);
+
+function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// 繪圖事件監聽 (支援滑鼠與手機觸控)
+function getMousePos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+    const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+    return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+    };
+}
+
+canvas.addEventListener("mousedown", startDraw);
+canvas.addEventListener("mousemove", drawing);
+canvas.addEventListener("mouseup", stopDraw);
+canvas.addEventListener("mouseleave", stopDraw);
+
+// 手機觸控支援
+canvas.addEventListener("touchstart", (e) => { startDraw(e); e.preventDefault(); });
+canvas.addEventListener("touchmove", (e) => { drawing(e); e.preventDefault(); });
+canvas.addEventListener("touchend", stopDraw);
+
+function startDraw(e) {
+    if (!doodleMode) return;
+    isDrawing = true;
+    const pos = getMousePos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+}
+
+function drawing(e) {
+    if (!isDrawing || !doodleMode) return;
+    const pos = getMousePos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+}
+
+function stopDraw() {
+    isDrawing = false;
+}
 
 // 點擊「送出」按鈕時，透過 POST 把新留言追加到試算表
 sendBtn.addEventListener("click", () => {
@@ -89,7 +177,16 @@ sendBtn.addEventListener("click", () => {
 });
 
 // 關閉燈箱
-closeBtn.addEventListener("click", () => lightbox.style.display = "none");
+closeBtn.addEventListener("click", () => {
+    lightbox.style.display = "none";
+    doodleMode = false;
+    updateDoodleUI();
+});
+
 lightbox.addEventListener("click", (e) => {
-    if (e.target === lightbox) lightbox.style.display = "none";
+    if (e.target === lightbox) {
+        lightbox.style.display = "none";
+        doodleMode = false;
+        updateDoodleUI();
+    }
 });
